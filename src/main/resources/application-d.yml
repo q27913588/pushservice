@@ -1,0 +1,12 @@
+app:
+  app-settings: /var/pushconfig/
+redis:
+  host: redis-container
+  port: 6379
+  db: 0
+  secret: ENC(cyxjVFnm/JH9BdsICRpFminO0jCjC7sI) #nanshan 1234
+aim:
+  batch-size: 100
+  api-url: https://nsaimdev.esi-tech.net/api/aimapi/NOtifyMsg
+  key: ESiAIM2019xxxxxxxxxxxxxxxxxxxxxx
+  iv: ESiAIM2019xxxxxx

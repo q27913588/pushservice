@@ -1,0 +1,30 @@
+app:
+  id: agapp-prod
+  secret: zsdluiawelkr5weraq1
+  setting: /var/pushconfig/setting.properties
+  app-settings: /var/pushconfig/
+redis:
+  host: 10.126.1.221
+  port: 6379
+  db: 0
+  secret: ENC(cyxjVFnm/JH9BdsICRpFminO0jCjC7sI) #nanshan 1234
+aim:
+  batch-size: 100
+  api-url: https://nsaimdev.esi-tech.net/api/aimapi/NOtifyMsg
+  key: ESiAIM2019xxxxxxxxxxxxxxxxxxxxxx
+  iv: ESiAIM2019xxxxxx
+spring:
+  datasource:
+    url: jdbc:sqlserver://10.127.2.21:1433;databaseName=MASA_DB;sslProtocol=TLSv1.2;Encrypt=false
+    username: MASA
+    secret: 1qaz@WSX3edc
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    database: sql-server
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl

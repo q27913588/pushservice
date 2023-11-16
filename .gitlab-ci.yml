@@ -1,0 +1,142 @@
+stages:
+  - build
+  - deploy
+  - serve
+  - reg_pack
+  - prod_bind
+  - prod_pack
+
+Dev_Build:
+  tags: [docker]
+  stage: build
+  allow_failure: false
+  script:
+    - mkdir artifact
+    - docker build --platform linux/amd64 -t pushservice:dev .
+    - docker save -o artifact/pushservice-dev.tar pushservice:dev
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+  artifacts:
+    paths:
+      - artifact/*
+    expire_in: 3 hours
+
+Deploy_D-MASA:
+  tags: [dmasa]
+  stage: deploy
+  script:
+    - cp artifact/pushservice-dev.tar /nfs/src/gitlab-runner/pushservice-dev.tar
+    # - /nfs/src/pushservice/update-pushservice.sh
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+  needs:
+    - "Dev_Build"
+
+#TODO: Versioning
+QAS_Build:
+  tags: [docker]
+  stage: build
+  allow_failure: false
+  script:
+    - mkdir artifact
+    - docker build --platform linux/amd64 -t pushservice:qas .
+    - docker save -o artifact/pushservice-qas.tar pushservice:qas
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "QAS"'
+      when: manual
+  artifacts:
+    paths:
+      - artifact/*
+    expire_in: 3 hours
+
+QAS_Deploy:
+  tags: [qmasa]
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - cp artifact/pushservice-qas.tar /nfs/src/infrastructure/images/pushservice.tar
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "QAS"'
+  needs:
+    - "QAS_Build"
+
+REG_Build:
+  tags: [docker]
+  stage: build
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release\/\d+\.\d+\.\d+$/
+      when: manual
+  script:
+    - build=$((${BUILD_NUMBER} + 1))
+    - 'curl -k --request PUT --header "PRIVATE-TOKEN: ${CI_TOKEN}" "${CI_GITLAB}/api/v4/projects/${CI_PROJECT_ID}/variables/BUILD_NUMBER" --form "value= ${build}"'
+    - mkdir artifact
+    - version=${CI_COMMIT_REF_NAME#release/}.${build}
+    - "echo Version: ${version}"
+    - docker build --no-cache --platform linux/amd64 -t pushservice:${version} .
+    - docker save -o artifact/pushservice.tar pushservice:${version}
+    - cd script
+    - BUILD_VERSION=$version PACK_FOLDER=deploy_R PACK_ENV=reg ./bind_ver.sh
+    - cp new_config.yaml ../artifact/config.yaml
+  artifacts:
+    paths:
+      - artifact/*
+    expire_in: 3 hours
+
+REG_Pack:
+  tags: [qmasa]
+  stage: reg_pack
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release\/\d+\.\d+\.\d+$/
+  needs:
+    - "REG_Build"
+  script:
+    - cp artifact/pushservice.tar /nfs/src/deploy_R/images/pushservice.tar
+    - cp artifact/config.yaml /nfs/src/deploy_R/vars/pushservice/config.yaml
+
+PROD_Bind:
+  tags: [shell_runner]
+  stage: prod_bind
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release\/\d+\.\d+\.\d+$/
+      when: manual
+  needs:
+    - "REG_Pack"
+  script:
+    - mkdir artifact
+    - version=${CI_COMMIT_REF_NAME#release/}.${BUILD_NUMBER}
+    - "echo Version: ${version}"
+    - cd script
+    - BUILD_VERSION=$version PACK_FOLDER=deploy_P PACK_ENV=prod ./bind_ver.sh
+    - cp new_config.yaml ../artifact/config.yaml
+  artifacts:
+    paths:
+      - artifact/*
+    expire_in: 3 hours
+
+PROD_Pack:
+  tags: [qmasa]
+  stage: prod_pack
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release\/\d+\.\d+\.\d+$/
+  needs:
+    - "PROD_Bind"
+  script:
+    - cp /nfs/src/deploy_R/images/pushservice.tar /nfs/src/deploy_P/images/pushservice.tar
+    - cp artifact/config.yaml /nfs/src/deploy_P/vars/pushservice/config.yaml
+
+PROD_Released:
+  tags: [shell_runner]
+  stage: .post
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release\/\d+\.\d+\.\d+$/
+      when: manual
+  script:
+    - 'curl -k --request PUT --header "PRIVATE-TOKEN: ${CI_TOKEN}" "${CI_GITLAB}/api/v4/projects/${CI_PROJECT_ID}/variables/BUILD_NUMBER" --form "value= 0"'
+    - version=${CI_COMMIT_REF_NAME#release/}
+    - "echo Release Version: ${version}"
+    - RELEASE_VERSION=$version ./script/release.sh
+  needs:
+    - "PROD_Pack"

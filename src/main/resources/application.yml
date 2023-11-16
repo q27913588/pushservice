@@ -1,0 +1,47 @@
+app:
+  id: whoAmI
+  secret: zsdluiawelkr5weraq1
+  setting: setting.properties
+  app-settings: /var/pushconfig/
+  cors:
+    allowed-origins:
+    - \*
+  message_size: 100
+  batch-size: 400
+  batch-delay: 1
+  hist-ttl: 60
+  hist-ttl-unit: d
+  firebase-default: test-firebase-adminsdk.json
+  firebase-list:
+    - name: test
+      adminsdk: /etc/pushservice/test-firebase-adminsdk.json
+    - name: test2
+      adminsdk: test-28591-firebase-adminsdk-ryalf-97eb1811c9.json
+spring:
+  profiles:
+    active: 
+  data:
+    rest:
+      base-path: /api
+  datasource:
+    url: jdbc:sqlserver://127.0.0.1:1433;databaseName=MASA_DB;sslProtocol=TLSv1.2;Encrypt=false
+    username: sa
+    secret: 1qaz@WSX3edc
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    database: sql-server
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+aim:
+  batch-size: 100
+  api-url: https://nsaimdev.esi-tech.net/api/aimapi/NOtifyMsg
+  key: ESiAIM2019xxxxxxxxxxxxxxxxxxxxxx
+  iv: ESiAIM2019xxxxxx
+jasypt:
+  encryptor:
+    password: 27339379

@@ -1,0 +1,28 @@
+version: '2.3'
+services:
+  # proxy:
+  #   image: nginx-proxy:push
+  #   container_name: nginx-push-container
+  #   restart: always
+  #   ports:
+  #     - 8087:80
+  # redis:
+  #   image: redis
+  #   container_name: redis-container
+  #   command: redis-server --requirepass Eason9379
+  #   restart: always
+    #ports:
+    #  - 6379:6379
+  pushservice:
+    image: pushservice
+    container_name: pushservice-container
+    restart: always
+    volumes:
+      - /var/pushconfig:/var/pushconfig
+    environment:
+    - SPRING_PROFILES_ACTIVE=d
+    #ports:
+    #  - 8089:8080
+    #extra_hosts:
+    #  - "host.docker.internal:host-gateway"      
+

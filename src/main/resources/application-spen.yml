@@ -1,0 +1,18 @@
+app:
+  app-settings: c:\temp\NsgPush\config\
+redis:
+  host: 127.0.0.1
+  port: 6379
+  db: 0
+  secret: ENC(Y9/RZ997VJ7ctM4uGt/L0jZ38NEwXz6Z)
+aim:
+  batch-size: 100
+  api-url: https://nsaimdev.esi-tech.net/api/aimapi/NOtifyMsg
+  key: ESiAIM2019xxxxxxxxxxxxxxxxxxxxxx
+  iv: ESiAIM2019xxxxxx
+spring:
+  datasource:
+    url: jdbc:sqlserver://127.0.0.1:52753;databaseName=NsgPush;sslProtocol=TLSv1.2;Encrypt=false
+    username: sa
+    secret: 27339379
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
