@@ -32,20 +32,21 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
-import pushservice.Service.QuartzService;
+
 import pushservice.schedule.QuartzSchedulerListener;
 
 @SpringBootApplication
+@EnableWebMvc
 public class Application extends SpringBootServletInitializer {
 
 	private static Logger logger = Logger.getLogger(Application.class);
 	
-	@Autowired
-	QuartzService quartzService;
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
